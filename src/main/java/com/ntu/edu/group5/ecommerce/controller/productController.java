@@ -28,17 +28,17 @@ public class ProductController {
         products.add(new Product("Sumsung Galaxy watch", "Technological Product from Samsung", 499.0));
     }
 
-    //helper method
+    // helper method
     private int getProductIndex(String productId) {
-        for(Product product: products) {
-            if(product.getProductId().equals(productId)){
+        for (Product product : products) {
+            if (product.getProductId().equals(productId)) {
                 return products.indexOf(product);
             }
         }
         throw new ProductNotFoundException(productId);
     }
 
-    @GetMapping({"/", "" })
+    @GetMapping({ "/", "" })
     public ResponseEntity<ArrayList<Product>> getAllProducts() {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
@@ -48,12 +48,12 @@ public class ProductController {
         try {
             int index = getProductIndex(id);
             return new ResponseEntity<>(products.get(index), HttpStatus.OK);
-        } catch(ProductNotFoundException rtex) {
+        } catch (ProductNotFoundException rtex) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping({"", "/"})
+    @PostMapping({ "", "/" })
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         products.add(product);
         return new ResponseEntity<>(product, HttpStatus.CREATED);
