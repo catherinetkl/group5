@@ -1,34 +1,46 @@
 package com.ntu.edu.group5.ecommerce.entity;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Digits;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
-import org.hibernate.validator.constraints.Range;
-
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @Entity
+@Transactional
 @Table(name = "customer")
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "customer_id")
+    private Long customerId;
 
     @NotBlank(message = "First name is mandatory")
     @Column(name = "first_name")
@@ -41,26 +53,56 @@ public class Customer {
     @Column(name = "email")
     private String email;
 
-    // [Activity 2 - validation]
-    @Digits(fraction = 0, integer = 8, message = "Contact no should be 8 digits")
-    @Column(name = "contact_no")
+    @NotNull(message = "Please enter the password")
+    @Column(name = "hashed_password")
+    private String hashedPassword;
+
+    @NotNull(message = "Contact number should be 8 digits")
+    @Column(name = "contact_no", unique = true)
+    @Pattern(regexp = "[689]{1}[0-9]{7}", message = "Enter a valid 8 digit contact number")
     private String contactNo;
 
-    @Column(name = "job_title")
-    private String jobTitle;
+    private LocalDateTime createdOn;
+    private LocalDateTime updatedOn;
 
-    // [Activity 2 - validation]
-    @Range(min = 1940, max = 2005, message = "Year Of Birth should be between 1940 and 2005")
-    @Column(name = "year_of_birth")
-    private int yearOfBirth;
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "customer_address_mapping", joinColumns = {
+            @JoinColumn(name = "customer_id")
+    }, inverseJoinColumns = {
+            @JoinColumn(name = "address_id")
+    })
+    private Map<String, Address> address = new HashMap<>();
 
-    public Customer(){}
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<Address> addresses;
 
-    public Customer(String firstName, String lastName, String contactNo, int yearOfBirth) {
+    public Customer() {
+    }
+
+    public Customer(String firstName, String lastName, String contactNo) {
         this();
         this.firstName = firstName;
         this.lastName = lastName;
         this.contactNo = contactNo;
-        this.yearOfBirth = yearOfBirth;
     }
+
+    // Method to set hashed password using BCrypt
+    public void setHashedPassword(String plainPassword) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.hashedPassword = passwordEncoder.encode(plainPassword);
+    }
+
+    // Establishing Customer - Order relationship
+    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "customer")
+    private List<Order> orders;
+
+    // Establishing Customer - Cart relationship
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cart_id", referencedColumnName = "id")
+    private Cart cart;
+
+    public void setOrders(ArrayList<Order> arrayList) {
+    }
+
 }

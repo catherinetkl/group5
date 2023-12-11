@@ -1,27 +1,79 @@
 package com.ntu.edu.group5.ecommerce.entity;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Getter
-@Setter
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class Product {
-    private String productId;
-    private String name;
+
+    @Id
+    private Long productId;
+
+    @NotNull
+    private String productName;
+
+    @NotNull
     private String description;
+
+    @NotNull
+    @DecimalMin(value = "0.0", inclusive = false)
     private double price;
 
-    public Product() {
-        this.productId = UUID.randomUUID().toString();
-    }
+    @NotNull
+	private String manufacturer;
 
-    public Product(String name, String description, double price) {
-        this();
-        this.name = name;
+    @NotNull
+    @Min(value = 0)
+    private Integer quantity;
+
+    @Enumerated(EnumType.STRING)
+    private CategoryEnum category;
+
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Seller seller;
+
+    @OneToMany(mappedBy = "cartProduct", cascade = CascadeType.ALL)
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    @ManyToMany
+    @JsonIgnore
+    private List<Cart> productCarts = new ArrayList<>();
+
+    public Product(Long productId, String productName, String description, double price, String manufacturer, Integer quantity, CategoryEnum category, ProductStatus status, Seller seller) {
+        this.productId = productId;
+        this.productName = productName;
         this.description = description;
         this.price = price;
+        this.manufacturer = manufacturer;
+        this.quantity = quantity;
+        this.category = category;
+        this.status = status;
+        this.seller = seller;
     }
 }

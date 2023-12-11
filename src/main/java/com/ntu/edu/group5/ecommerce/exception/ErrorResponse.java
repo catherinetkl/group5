@@ -3,13 +3,14 @@ package com.ntu.edu.group5.ecommerce.exception;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class ErrorResponse {
-    private String message;
     private LocalDateTime timestamp;
+    private String message;
+    private String details;
 }

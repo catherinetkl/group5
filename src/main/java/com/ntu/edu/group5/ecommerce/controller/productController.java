@@ -1,84 +1,88 @@
 package com.ntu.edu.group5.ecommerce.controller;
 
-import java.util.ArrayList;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+import com.ntu.edu.group5.ecommerce.entity.CategoryEnum;
 import com.ntu.edu.group5.ecommerce.entity.Product;
+import com.ntu.edu.group5.ecommerce.entity.ProductDTO;
+import com.ntu.edu.group5.ecommerce.entity.ProductStatus;
 import com.ntu.edu.group5.ecommerce.exception.ProductNotFoundException;
+import com.ntu.edu.group5.ecommerce.service.ProductService;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
-    private ArrayList<Product> products = new ArrayList<>();
+    @Autowired
+    private ProductService productService;
 
-    public ProductController() {
-        products.add(new Product("Ipad", "Technological Product from Apple", 1899.99));
-        products.add(new Product("Apple Pen", "Technological stylus from Apple", 98.99));
-        products.add(new Product("Sumsung Galaxy watch", "Technological Product from Samsung", 499.0));
-    }
-
-    //helper method
-    private int getProductIndex(String productId) {
-        for(Product product: products) {
-            if(product.getProductId().equals(productId)){
-                return products.indexOf(product);
-            }
-        }
-        throw new ProductNotFoundException(productId);
-    }
-
-    @GetMapping({"/", "" })
-    public ResponseEntity<ArrayList<Product>> getAllProducts() {
+    @GetMapping({"/", ""})
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productService.getAllProductsInCatalog();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable String id) {
+    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
         try {
-            int index = getProductIndex(id);
-            return new ResponseEntity<>(products.get(index), HttpStatus.OK);
-        } catch(ProductNotFoundException rtex) {
+            Product product = productService.getProductFromCatalogById(id);
+            return new ResponseEntity<>(product, HttpStatus.OK);
+        } catch (ProductNotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping({"", "/"})
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        products.add(product);
-        return new ResponseEntity<>(product, HttpStatus.CREATED);
+        Product addedProduct = productService.addProductToCatalog(null, product);
+        return new ResponseEntity<>(addedProduct, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product product) {
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
         try {
-            int index = getProductIndex(id);
-            products.set(index, product);
-
-            return new ResponseEntity<>(product, HttpStatus.OK);
-        } catch (ProductNotFoundException rtex) {
+            Product updatedProduct = productService.updateProductInCatalog(product);
+            return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+        } catch (ProductNotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable String id) {
+    public ResponseEntity<Product> deleteProduct(@PathVariable Long id) {
         try {
-            int index = getProductIndex(id);
-            return new ResponseEntity<>(products.remove(index), HttpStatus.NO_CONTENT);
-        } catch (ProductNotFoundException rtex) {
+            productService.deleteProductFromCatalog(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (ProductNotFoundException ex) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    // Get all products of a specific seller
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<ProductDTO>> getProductsOfSeller(@PathVariable Long sellerId) {
+        List<ProductDTO> products = productService.getAllProductsOfSeller(sellerId);
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    // Get all products in a specific category
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<ProductDTO>> getProductsInCategory(@PathVariable String category) {
+        CategoryEnum categoryEnum = CategoryEnum.valueOf(category.toUpperCase());
+        List<ProductDTO> products = productService.getProductsOfCategory(categoryEnum);
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    // Get all products with a specific status
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<ProductDTO>> getProductsByStatus(@PathVariable String status) {
+        ProductStatus productStatus = ProductStatus.valueOf(status.toUpperCase());
+        List<ProductDTO> products = productService.getProductsOfStatus(productStatus);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 }

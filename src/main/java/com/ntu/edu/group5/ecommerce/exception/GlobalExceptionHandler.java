@@ -10,53 +10,60 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     // // this is handler for CustomerNotFoundException
-    // @ExceptionHandler({CustomerNotFoundException.class, InteractionNotFoundException.class})
-    // public ResponseEntity<ErrorResponse> handleResourceNotFoundException(CustomerNotFoundException ex){
-    //     ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
-    //     return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    // }
-
-    // [Activity 1 - Refactor]
-    // @ExceptionHandler(InteractionNotFoundException.class)
-    // public ResponseEntity<ErrorResponse> handleInteractionNotFoundException(CustomerNotFoundException ex){
-    //     ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), LocalDateTime.now());
-    //     return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    // }
-
-    @ExceptionHandler(EmptyResultDataAccessException.class)
-    public ResponseEntity<ErrorResponse> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
-        ErrorResponse errorResponse = new ErrorResponse("Item does not exist.", LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(CustomerNotFoundException cnfe, WebRequest wr) {
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), cnfe.getMessage(), wr.getDescription(false));
+        return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
     }
 
+    // this is handler for CustomerException
+    @ExceptionHandler(CustomerException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerException(CustomerException ce, WebRequest wr) {
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), ce.getMessage(), wr.getDescription(false));
+        return new ResponseEntity<>(err, HttpStatus.FORBIDDEN);
+    }
+
+    // this is handler for NoHandlerFoundException
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoHandlerFoundException nhfe, WebRequest wr) {
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), nhfe.getMessage(), wr.getDescription(false));
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
+
+    // this is handler for MethodArgumentNotValidException
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex){
-        // Get a list of all validation errors from the exception object
-        List<ObjectError> validationErrors = ex.getBindingResult().getAllErrors();
-
-        // Create a StringBuilder to store all error messages
-        StringBuilder sb = new StringBuilder();
-
-        for (ObjectError error : validationErrors) {
-            sb.append(error.getDefaultMessage() + ".");
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException manve, WebRequest wr) {
+        List<ObjectError> errors = manve.getBindingResult().getAllErrors();
+        String message = "";
+        for (ObjectError error : errors) {
+            message += error.getDefaultMessage() + "\n";
         }
-
-        ErrorResponse errorResponse = new ErrorResponse(sb.toString(), LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), message, wr.getDescription(false));
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 
+    // this is handler for Exception
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleException(Exception ex, WebRequest wr) {
         // We can log the exception here
         // logger.error(ex.getMessage(), ex);
 
         // return generic error message;
-        ErrorResponse errorResponse = new ErrorResponse("Something went wrong", LocalDateTime.now());
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), ex.getMessage(), wr.getDescription(false) );
+        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    }
+
+    // this is handler for EmptyResultDataAccessException
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
+        ErrorResponse err = new ErrorResponse(LocalDateTime.now(), "Item does not exist.", ex.getMessage());
+        return new ResponseEntity<>(err, HttpStatus.NOT_FOUND);
     }
 }
