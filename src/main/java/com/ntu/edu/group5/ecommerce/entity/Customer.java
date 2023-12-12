@@ -1,10 +1,14 @@
 package com.ntu.edu.group5.ecommerce.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Email;
@@ -15,12 +19,14 @@ import org.hibernate.validator.constraints.Range;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "customer")
 public class Customer {
@@ -54,10 +60,10 @@ public class Customer {
     @Column(name = "year_of_birth")
     private int yearOfBirth;
 
-    public Customer(){}
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    private Cart customerCart;
 
     public Customer(String firstName, String lastName, String contactNo, int yearOfBirth) {
-        this();
         this.firstName = firstName;
         this.lastName = lastName;
         this.contactNo = contactNo;

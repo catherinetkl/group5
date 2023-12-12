@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import com.ntu.edu.group5.ecommerce.entity.Customer;
+import com.ntu.edu.group5.ecommerce.repository.CustomerRepository;
+
 @Primary
 @Service
 public class CustomerServiceWithLoggingImpl implements CustomerService {

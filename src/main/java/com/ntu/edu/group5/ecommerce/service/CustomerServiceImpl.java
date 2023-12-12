@@ -6,16 +6,18 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.ntu.edu.group5.ecommerce.entity.Customer;
+import com.ntu.edu.group5.ecommerce.exception.CustomerNotFoundException;
 import com.ntu.edu.group5.ecommerce.repository.CustomerRepository;
-
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
     private CustomerRepository customerRepository;
 
+    // @Autowired
     public CustomerServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
+
     }
 
     @Override
@@ -31,9 +33,38 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Customer getCustomer(Long id) {
+        // Optional<Customer> optionalCustomer = customerRepository.findById(id);
+        // if(optionalCustomer.isPresent()) {
+        // Customer foundCustomer = optionalCustomer.get();
+        // return foundCustomer;
+        // }
+        // throw new CustomerNotFoundException(id);
+        return customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
+    }
+
+    @Override
     public ArrayList<Customer> getAllCustomers() {
         List<Customer> allCustomers = customerRepository.findAll();
         return (ArrayList<Customer>) allCustomers;
+    }
+
+    @Override
+    public Customer updateCustomer(Long id, Customer customer) {
+        // retrieve the customer from the database
+        // [Activity 1 - Refactor code]
+        Customer customerToUpdate = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException(id));
+        // update the customer retrieved from the database
+        customerToUpdate.setFirstName(customer.getFirstName());
+        customerToUpdate.setLastName(customer.getLastName());
+        customerToUpdate.setEmail(customer.getEmail());
+        customerToUpdate.setContactNo(customer.getContactNo());
+        customerToUpdate.setJobTitle(customer.getJobTitle());
+        customerToUpdate.setYearOfBirth(customer.getYearOfBirth());
+        customerToUpdate.setCustomerCart(customer.getCustomerCart());
+        // save the updated customer back to the database
+        return customerRepository.save(customerToUpdate);
     }
 
     @Override
@@ -41,17 +72,4 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.deleteById(id);
     }
 
-    @Override
-    public Customer updateCustomer(Long id, Customer customer) {
-        if (customerRepository.existsById(id)) {
-            customer.setId(id);
-            return customerRepository.save(customer);
-        }
-        return null; // or throw an exception indicating that the customer with the given id doesn't exist
-    }
-
-    @Override
-    public Customer getCustomer(Long id) {
-        return customerRepository.findById(id).orElse(null);
-    }
 }
