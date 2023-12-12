@@ -1,20 +1,21 @@
 package com.ntu.edu.group5.ecommerce.service;
 
-import com.ntu.edu.group5.ecommerce.entity.Address;
+import java.util.ArrayList;
 
-import java.util.List;
+import com.ntu.edu.group5.ecommerce.entity.Address;
 
 public interface AddressService {
 
     Address createAddress(Address address);
 
-    List<Address> getAllAddresses();
+    Address getAddress(Long id);
 
-    Address getAddressById(Integer id);
+    ArrayList<Address> getAllAddresses();
 
-    List<Address> getAddressesByPostalCode(String postalCode);
+    Address updateAddress(Long id, Address address);
 
-    Address updateAddress(Integer id, Address updatedAddress);
+    void deleteAddress(Long id);
 
-    void deleteAddress(Integer id);
+    ArrayList<Address> searchAddressesByCity(String city);
 }
+

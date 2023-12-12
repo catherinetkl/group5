@@ -1,65 +1,56 @@
 package com.ntu.edu.group5.ecommerce.service;
 
-import com.ntu.edu.group5.ecommerce.entity.Address;
-import com.ntu.edu.group5.ecommerce.exception.AddressNotFoundException;
-import com.ntu.edu.group5.ecommerce.repository.AddressRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.ntu.edu.group5.ecommerce.entity.Address;
+import com.ntu.edu.group5.ecommerce.repository.AddressRepository;
 
 @Service
 public class AddressServiceImpl implements AddressService {
 
-    private final AddressRepository addressRepository;
+    private AddressRepository addressRepository;
 
-    @Autowired
     public AddressServiceImpl(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
 
     @Override
+    public ArrayList<Address> searchAddressesByCity(String city) {
+        List<Address> foundAddresses = addressRepository.findByCity(city);
+        return (ArrayList<Address>) foundAddresses;
+    }
+
+    @Override
     public Address createAddress(Address address) {
-        return addressRepository.save(address);
+        Address newAddress = addressRepository.save(address);
+        return newAddress;
     }
 
     @Override
-    public List<Address> getAllAddresses() {
-        return addressRepository.findAll();
+    public ArrayList<Address> getAllAddresses() {
+        List<Address> allAddresses = addressRepository.findAll();
+        return (ArrayList<Address>) allAddresses;
     }
 
     @Override
-    public Address getAddressById(Integer id) {
-        return addressRepository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException(id));
+    public void deleteAddress(Long id) {
+        addressRepository.deleteById(id);
     }
 
     @Override
-    public List<Address> getAddressesByPostalCode(String postalCode) {
-        return addressRepository.findByPostalCode(postalCode);
+    public Address updateAddress(Long id, Address address) {
+        if (addressRepository.existsById(id)) {
+            address.setId(id);
+            return addressRepository.save(address);
+        }
+        return null; // or throw an exception indicating that the address with the given id doesn't exist
     }
 
     @Override
-    public Address updateAddress(Integer id, Address updatedAddress) {
-        Address existingAddress = addressRepository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException(id));
-
-        // Update the fields to change in existingAddress
-        existingAddress.setStreetName(updatedAddress.getStreetName());
-        existingAddress.setBuildingName(updatedAddress.getBuildingName());
-        existingAddress.setCity(updatedAddress.getCity());
-        existingAddress.setState(updatedAddress.getState());
-        existingAddress.setPostalCode(updatedAddress.getPostalCode());
-
-        return addressRepository.save(existingAddress);
-    }
-
-    @Override
-    public void deleteAddress(Integer id) {
-        Address existingAddress = addressRepository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException(id));
-
-        addressRepository.delete(existingAddress);
+    public Address getAddress(Long id) {
+        return addressRepository.findById(id).orElse(null);
     }
 }
-
