@@ -16,7 +16,6 @@ com/ntu/edu/group5/ecommerce/entity/Customer.class
 com/ntu/edu/group5/ecommerce/controller/CustomerController.class
 com/ntu/edu/group5/ecommerce/controller/ProductController.class
 com/ntu/edu/group5/ecommerce/service/CustomerServiceImpl.class
-com/ntu/edu/group5/ecommerce/service/CustomerServiceWithLoggingImpl.java.old
 com/ntu/edu/group5/ecommerce/entity/Seller.class
 com/ntu/edu/group5/ecommerce/service/CustomerService.class
 com/ntu/edu/group5/ecommerce/repository/ProductRepository.class

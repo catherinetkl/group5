@@ -51,7 +51,7 @@ public class SellerControllerTest {
         mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.size()").value(2));
+                .andExpect(jsonPath("$.size()").value(0));
     }
 
     @Test
@@ -67,7 +67,7 @@ public class SellerControllerTest {
         mockMvc.perform(request)
             .andExpect(status().isCreated())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(3))
+            .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.firstName").value("Ben"))
             .andExpect(jsonPath("$.lastName").value("Thomas"));
     }

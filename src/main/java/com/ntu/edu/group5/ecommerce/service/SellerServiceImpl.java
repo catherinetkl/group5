@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.ntu.edu.group5.ecommerce.entity.Seller;
+import com.ntu.edu.group5.ecommerce.exception.SellerNotFoundException;
 import com.ntu.edu.group5.ecommerce.repository.SellerRepository;
 
 @Service
@@ -42,18 +43,22 @@ public class SellerServiceImpl implements SellerService {
 
     @Override
     public Seller updateSeller(Long id, Seller seller) {
-        if (sellerRepository.existsById(id)) {
-            seller.setId(id);
-            return sellerRepository.save(seller);
-        }
-        return null; // or throw an exception indicating that the customer with the given id doesn't exist
+        Seller sellerToUpdate = sellerRepository.findById(id)
+                .orElseThrow(() -> new SellerNotFoundException(id));
+        sellerToUpdate.setFirstName(seller.getFirstName());
+        sellerToUpdate.setLastName(seller.getLastName());
+        sellerToUpdate.setEmail(seller.getEmail());
+        sellerToUpdate.setContactNo(seller.getContactNo());
+        sellerToUpdate.setPassword(seller.getPassword());
+        sellerToUpdate.setProducts(seller.getProducts());
+
+        return sellerRepository.save(sellerToUpdate);
     }
+
 
     @Override
     public Seller getSeller(Long id) {
-        return sellerRepository.findById(id).orElse(null);
-    }
-
-
+        return sellerRepository.findById(id).orElseThrow(() -> new SellerNotFoundException(id));
     
+}
 }
